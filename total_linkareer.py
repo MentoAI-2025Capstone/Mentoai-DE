@@ -1,33 +1,5 @@
-# # Crawling server
-
-# from fastapi import FastAPI, Query
-# import requests
-# from bs4 import BeautifulSoup
-
-# app = FastAPI()
-
-# @app.get("/crawl")
-# def crawl_webtoon(url: str = Query(...)):
-#     print(f"Crawling URL: {url}")
-
-#     try:
-#         response = requests.get(url)
-#         soup = BeautifulSoup(response.text, 'html.parser')
-#         print(soup)
-        
-#         return {"status": "success", "data": soup.prettify()}
-#     except Exception as e:
-#         print(f"Error: {e}")
-#         return {"status": "error", "message": str(e)}
-    
-# @app.get("/favicon.ico")
-# def favicon():
-#     return {"message": "Favicon not found"}
-
-
 ################################## total crawling
 import requests
-import json
 from datetime import datetime
 from time import sleep
 
@@ -43,7 +15,7 @@ headers = {
     "Content-Type": "application/json"
 }
 
-# 필터용 category ID -> 이름 매핑
+# category ID -> 이름 매핑
 category_map = {
     "28": "기획/아이디어",
     "29": "광고/마케팅",
@@ -95,11 +67,11 @@ while True:
         res = requests.post(url, headers=headers, json=payload)
         data = res.json()
     except Exception as e:
-        print(f"❌ 요청 실패: {e}")
+        print(f"요청 실패: {e}")
         break
 
     if "errors" in data:
-        print("❌ GraphQL 에러 발생:")
+        print("GraphQL 에러 발생:")
         for err in data["errors"]:
             print(f"- {err['message']}")
         break
@@ -111,7 +83,7 @@ while True:
     all_activities.extend(activities)
     total_collected += len(activities)
 
-    print(f"✅ {page}페이지 불러옴 (누적: {total_collected})")
+    print(f"{page}페이지 불러옴 (누적: {total_collected})")
 
     if len(activities) < page_size:
         break
@@ -119,15 +91,15 @@ while True:
     page += 1
     sleep(0.5)
 
-# 출력
-print(f"\n✅ 전체 공모전 개수: {total_collected}\n")
+
+print(f"\n 전체 공모전 개수: {total_collected}\n")
 
 for item in all_activities:
     title = item.get("title")
     activity_url = f"https://linkareer.com/activity/{item['id']}"
     deadline = datetime.fromtimestamp(item["recruitCloseAt"] / 1000).strftime("%Y-%m-%d") if item.get("recruitCloseAt") else "없음"
     org = item.get("organizationName", "미정")
-    category = "공모전"  # activityTypeID == 3
+    category = "공모전"  # 타입 = 3
 
     print(f"제목: {title}")
     print(f"링크: {activity_url}")

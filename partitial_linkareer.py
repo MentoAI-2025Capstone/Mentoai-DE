@@ -1,6 +1,5 @@
 ##################################partial crawling
 import requests
-import json
 from datetime import datetime
 
 url = "https://api.linkareer.com/graphql"
@@ -24,7 +23,7 @@ payload = {
         "page": 1,
         "activityOrder": {
             "field": "CREATED_AT",
-            "direction": "DESC"  # 최신순
+            "direction": "DESC"  
         }
     },
     "extensions": {
