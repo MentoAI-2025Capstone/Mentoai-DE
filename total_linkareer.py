@@ -1,7 +1,11 @@
 ################################## total crawling
-import requests
+import csv
+import json
 from datetime import datetime
+from pathlib import Path
 from time import sleep
+
+import requests
 
 # 요청 URL
 url = "https://api.linkareer.com/graphql"
@@ -38,6 +42,9 @@ page_size = 50
 page = 1
 total_collected = 0
 all_activities = []
+structured_rows = []
+output_dir = Path("output")
+output_dir.mkdir(exist_ok=True)
 
 # 페이지 반복
 while True:
@@ -108,4 +115,36 @@ for item in all_activities:
     print(f"접수 마감: {deadline}")
     print("-" * 40)
 
+    structured_rows.append(
+        {
+            "title": title,
+            "url": activity_url,
+            "category": category,
+            "organization": org,
+            "deadline": deadline,
+            "recruit_start": datetime.fromtimestamp(item["recruitStartAt"] / 1000).strftime("%Y-%m-%d")
+            if item.get("recruitStartAt")
+            else "없음",
+            "created_at": datetime.fromtimestamp(item["createdAt"] / 1000).strftime("%Y-%m-%d")
+            if item.get("createdAt")
+            else "알수없음",
+        }
+    )
 
+if structured_rows:
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    json_path = output_dir / f"linkareer_total_{timestamp}.json"
+    csv_path = output_dir / f"linkareer_total_{timestamp}.csv"
+
+    with open(json_path, "w", encoding="utf-8") as fp:
+        json.dump(structured_rows, fp, ensure_ascii=False, indent=2)
+
+    with open(csv_path, "w", newline="", encoding="utf-8") as fp:
+        writer = csv.DictWriter(fp, fieldnames=structured_rows[0].keys())
+        writer.writeheader()
+        writer.writerows(structured_rows)
+
+    print(f"\nJSON 파일 저장: {json_path}")
+    print(f"CSV 파일 저장(엑셀 열기 가능): {csv_path}")
+else:
+    print("저장할 데이터가 없습니다.")
