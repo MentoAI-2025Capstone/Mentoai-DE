@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+
+# Env
+.env
+.env.*
+
+# VSCode
+.vscode/
+
+# MacOS
+.DS_Store
+
+# Logs
+*.log
+
+# Crawling output
+output/
+
+# Virtual env
+venv/
+ENV/
+env/
+
+# Cache
+.cache/

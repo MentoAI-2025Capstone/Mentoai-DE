@@ -1,6 +1,12 @@
 ##################################partial crawling
 import requests
 from datetime import datetime
+import csv
+import json
+from datetime import datetime
+from pathlib import Path
+
+import requests
 
 url = "https://api.linkareer.com/graphql"
 
@@ -44,6 +50,9 @@ if "errors" in data:
     exit()
 
 activities = data.get("data", {}).get("activities", {}).get("nodes", [])
+output_dir = Path("output")
+output_dir.mkdir(exist_ok=True)
+structured_rows = []
 
 print(f"공모전 개수: {len(activities)}\n")
 
@@ -61,3 +70,30 @@ for item in activities:
     print(f"접수 마감: {deadline}")
     print("-" * 40)
 
+    structured_rows.append(
+        {
+            "title": title,
+            "url": activity_url,
+            "category": category,
+            "organization": org,
+            "deadline": deadline,
+        }
+    )
+
+if structured_rows:
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    json_path = output_dir / f"linkareer_partial_{timestamp}.json"
+    csv_path = output_dir / f"linkareer_partial_{timestamp}.csv"
+
+    with open(json_path, "w", encoding="utf-8") as fp:
+        json.dump(structured_rows, fp, ensure_ascii=False, indent=2)
+
+    with open(csv_path, "w", newline="", encoding="utf-8") as fp:
+        writer = csv.DictWriter(fp, fieldnames=structured_rows[0].keys())
+        writer.writeheader()
+        writer.writerows(structured_rows)
+
+    print(f"\nJSON 파일 저장: {json_path}")
+    print(f"CSV 파일 저장(엑셀 열기 가능): {csv_path}")
+else:
+    print("저장할 데이터가 없습니다.")
