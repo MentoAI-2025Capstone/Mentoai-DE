@@ -83,17 +83,10 @@ for item in activities:
 if structured_rows:
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     json_path = output_dir / f"linkareer_partial_{timestamp}.json"
-    csv_path = output_dir / f"linkareer_partial_{timestamp}.csv"
 
     with open(json_path, "w", encoding="utf-8") as fp:
         json.dump(structured_rows, fp, ensure_ascii=False, indent=2)
 
-    with open(csv_path, "w", newline="", encoding="utf-8") as fp:
-        writer = csv.DictWriter(fp, fieldnames=structured_rows[0].keys())
-        writer.writeheader()
-        writer.writerows(structured_rows)
-
     print(f"\nJSON 파일 저장: {json_path}")
-    print(f"CSV 파일 저장(엑셀 열기 가능): {csv_path}")
 else:
     print("저장할 데이터가 없습니다.")
